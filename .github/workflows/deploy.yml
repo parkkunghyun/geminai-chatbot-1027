@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_URI: us-central1-docker.pkg.dev/my-gcp-project/my-repo/my-image:latest
-      NEXT_PUBLIC_GEMINAI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINAI_API_KEY }}  # 환경 변수로 설정
+      NEXT_PUBLIC_GEMINAI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINAI_API_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -19,8 +19,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build --build-arg NEXT_PUBLIC_GEMINAI_API_KEY=${NEXT_PUBLIC_GEMINAI_API_KEY} -t $IMAGE_URI .
           echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode > $HOME/gcp-key.json
           gcloud auth activate-service-account --key-file $HOME/gcp-key.json
+          docker build --build-arg NEXT_PUBLIC_GEMINAI_API_KEY=${NEXT_PUBLIC_GEMINAI_API_KEY} -t $IMAGE_URI .
           gcloud auth configure-docker ${IMAGE_URI}
           docker push $IMAGE_URI

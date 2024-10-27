@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: GCP Deploy
 
 on:
   push:
@@ -6,26 +6,21 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    env:
-      IMAGE_URI: us-central1-docker.pkg.dev/as-rudgus4620/gcf-artifacts/geminai-chatbot:latest
-      NEXT_PUBLIC_GEMINAI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINAI_API_KEY }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Log in to GCP
-        run: |
-          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > $HOME/gcp-key.json
-          gcloud auth activate-service-account --key-file $HOME/gcp-key.json
+    - name: Set up GCP credentials
+      run: echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > /home/runner/gcp-key.json
 
-      - name: Configure Docker for Google Cloud
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+    - name: Authenticate to GCP
+      run: gcloud auth activate-service-account --key-file=/home/runner/gcp-key.json
 
-      - name: Build and push Docker image
-        run: |
-          # Build the Docker image
-          docker build --build-arg NEXT_PUBLIC_GEMINAI_API_KEY=${NEXT_PUBLIC_GEMINAI_API_KEY} -t $IMAGE_URI .
-          # Push the Docker image
-          docker push $IMAGE_URI
+    - name: Build and Push Docker Image
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+        docker build -t us-central1-docker.pkg.dev/as-rudgus/geminai-chat:latest .
+        docker push us-central1-docker.pkg.dev/as-rudgus4620/geminai-chat:latest

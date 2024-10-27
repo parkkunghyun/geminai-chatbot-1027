@@ -1,0 +1,4 @@
+# .dockerignore
+
+# Ignore .env.local
+.env.local

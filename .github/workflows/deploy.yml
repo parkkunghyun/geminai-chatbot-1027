@@ -4,23 +4,29 @@ on:
   push:
     branches:
       - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      IMAGE_URI: us-central1-docker.pkg.dev/as-rudgus4620/us-central1-docker.pkg.dev/as-rudgus4620/gcf-artifacts/geminai-chatbot:latest
+      IMAGE_URI: us-central1-docker.pkg.dev/as-rudgus4620/gcf-artifacts/geminai-chatbot:latest
       NEXT_PUBLIC_GEMINAI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINAI_API_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set up Google Cloud authentication
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }} # 서비스 계정 키 비밀
+          project_id: as-rudgus4620
+          export_default_credentials: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
       - name: Build and push Docker image
         run: |
-          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode > $HOME/gcp-key.json
-          gcloud auth activate-service-account --key-file $HOME/gcp-key.json
           docker build --build-arg NEXT_PUBLIC_GEMINAI_API_KEY=${NEXT_PUBLIC_GEMINAI_API_KEY} -t $IMAGE_URI .
-          gcloud auth configure-docker ${IMAGE_URI}
           docker push $IMAGE_URI

@@ -15,12 +15,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Google Cloud authentication
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-          project_id: as-rudgus4620
-          export_default_credentials: true
+      - name: Install Google Cloud SDK
+        run: |
+          echo "Installing Google Cloud SDK..."
+          curl -sSL https://sdk.cloud.google.com | bash
+          exec -l $SHELL
+          gcloud init
+
+      - name: Log in to GCP
+        run: |
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode > $HOME/gcp-key.json
+          gcloud auth activate-service-account --key-file $HOME/gcp-key.json
+          gcloud auth login
 
       - name: Configure Docker for Google Cloud
         run: gcloud auth configure-docker us-central1-docker.pkg.dev

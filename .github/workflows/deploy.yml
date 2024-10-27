@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      IMAGE_URI: us-central1-docker.pkg.dev/my-gcp-project/my-repo/my-image:latest
+      IMAGE_URI: us-central1-docker.pkg.dev/as-rudgus4620/us-central1-docker.pkg.dev/as-rudgus4620/gcf-artifacts/geminai-chatbot:latest
       NEXT_PUBLIC_GEMINAI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINAI_API_KEY }}
     steps:
       - name: Checkout code
